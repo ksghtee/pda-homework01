@@ -124,7 +124,7 @@ if __name__ == "__main__":
     
     # Задача 1
     num_students, num_groups, fsuir = filter_fsuir_students(data)
-    print(f"Задача 1:\nСтудентов на ФСУиР: {num_students}, Групп: {num_groups}\n\n")
+    print(f"Задача 1:\nСтудентов на ФСУиР: {num_students}, Групп: {num_groups}\n\n\n")
     
     # Задача 2
     has_homonyms, total_homonyms, homonyms_per_course, max_homonym_group = find_homonymous_students(fsuir)
