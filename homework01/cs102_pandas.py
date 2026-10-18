@@ -2,14 +2,20 @@ import pandas as pd
 import re
 from typing import Tuple
 
-
+df = pd.read_csv('isu_fake_data.csv')
 # Задача 1
 def filter_fsuir_students(data: pd.DataFrame) -> Tuple[int, int, pd.DataFrame]:
     """
     Создает подвыборку студентов факультета систем управления и робототехники (ФСУиР).
     Возвращает количество таких студентов, количество уникальных групп и отфильтрованный датасет.
     """
-    pass
+    df_suir = df[
+    df['факультет'].str.contains(
+        'факультет систем управления и робототехники',
+        na = False, case = False)]
+    count_suir = len(df_suir)
+    groups_suir = df_suir['группа'].nunique()
+    return count_suir, groups_suir, df_suir
 
 
 # Задача 2
@@ -23,6 +29,15 @@ def find_homonymous_students(df: pd.DataFrame) -> Tuple[bool, int, pd.Series, st
      - серию с числом однофамильцев по курсам
      - группу с максимальным числом однофамильцев
     """
+    df_suir = df_suir.copy()
+    df_suir['фамилия'] = df_suir['фио'].str.split().str[0]
+    surname_counts = df_suir['фамилия'].value_counts()
+    duplicates = surname_counts[surname_counts>1].index
+    df_odnofam = df_suir[df_suir['фамилия'].isin(duplicates)]
+    print(df_odnofam.groupby('курс').size().sort_index())
+    group_odnofam = df_odnofam.groupby('группа').size()
+    print('Группа с максимумом:', group_odnofam.idxmax(), '—', group_odnofam.max())
+
     pass
     
 
