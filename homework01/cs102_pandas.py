@@ -3,16 +3,14 @@ import re
 from typing import Tuple
 
 df = pd.read_csv('isu_fake_data.csv')
+df_suir = df[df['факультет'].str.contains('факультет систем управления и робототехники', na = False, case = False)]
 # Задача 1
 def filter_fsuir_students(data: pd.DataFrame) -> Tuple[int, int, pd.DataFrame]:
     """
     Создает подвыборку студентов факультета систем управления и робототехники (ФСУиР).
     Возвращает количество таких студентов, количество уникальных групп и отфильтрованный датасет.
     """
-    df_suir = df[
-    df['факультет'].str.contains(
-        'факультет систем управления и робототехники',
-        na = False, case = False)]
+    
     count_suir = len(df_suir)
     groups_suir = df_suir['группа'].nunique()
     return count_suir, groups_suir, df_suir
@@ -29,16 +27,16 @@ def find_homonymous_students(df: pd.DataFrame) -> Tuple[bool, int, pd.Series, st
      - серию с числом однофамильцев по курсам
      - группу с максимальным числом однофамильцев
     """
-    df_suir = df_suir.copy()
+
     df_suir['фамилия'] = df_suir['фио'].str.split().str[0]
     surname_counts = df_suir['фамилия'].value_counts()
     duplicates = surname_counts[surname_counts>1].index
     df_odnofam = df_suir[df_suir['фамилия'].isin(duplicates)]
-    print(df_odnofam.groupby('курс').size().sort_index())
+    df_course_odnofam = df_odnofam.groupby('курс').size().sort_index()
     group_odnofam = df_odnofam.groupby('группа').size()
-    print('Группа с максимумом:', group_odnofam.idxmax(), '—', group_odnofam.max())
-
-    pass
+    group_max_odnofam_name = group_odnofam.idxmax()
+    vsevo = df_odnofam.groupby('курс').size().sum()
+    return True if len(duplicates)>0 else False, vsevo, df_course_odnofam, group_max_odnofam_name
     
 
 # Задача 3
@@ -126,12 +124,13 @@ if __name__ == "__main__":
     
     # Задача 1
     num_students, num_groups, fsuir = filter_fsuir_students(data)
-    print(f"Студентов на ФСУиР: {num_students}, Групп: {num_groups}")
+    print(f"Задача 1:\nСтудентов на ФСУиР: {num_students}, Групп: {num_groups}\n\n")
     
     # Задача 2
     has_homonyms, total_homonyms, homonyms_per_course, max_homonym_group = find_homonymous_students(fsuir)
+    print("Задача 2:")
     print(f"Есть однофамильцы: {has_homonyms}, Всего: {total_homonyms}, Группа с максимумом: {max_homonym_group}")
-    print(f"На каждом курсе: {homonyms_per_course}")
+    print(f"На каждом курсе: {homonyms_per_course}\n\n")
     
     # Задача 3
     students_without_patronym, gender_counts = analyze_patronyms(fsuir)
