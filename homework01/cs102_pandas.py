@@ -44,7 +44,14 @@ def gender_identification(patronym: str) -> str:
     """
     Определяет пол по отчеству. Возвращает пол: female/male/unknown.
     """
-    pass
+
+    df_suir['отчество'] = df_suir['фио'].str.split().str[2]
+    no_otchestvo = df_suir['отчество'].isna().sum()
+    df_girls = df_suir[df_suir['отчество'].str.contains('на', na=False)]
+    df_boys = df_suir[df_suir['отчество'].str.contains('ич', na = False)]
+    print('Без отчества ', no_otchestvo, 'студентов')
+    gender_counts = pd.DataFrame([len(df_girls), len(df_boys), len(df_suir)-len(df_girls)-len(df_boys)-no_otchestvo], columns = ['девушек', 'парней','не определено по отчеству'])
+    return no_otchestvo, gender_counts
 
 
 def analyze_patronyms(df: pd.DataFrame) -> Tuple[int, pd.Series]:
