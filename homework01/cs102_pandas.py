@@ -45,10 +45,6 @@ def gender_identification(patronym: str) -> str:
     Определяет пол по отчеству. Возвращает пол: female/male/unknown.
     """
     pass
-
-    
-
-
 def analyze_patronyms(df: pd.DataFrame) -> Tuple[int, pd.Series]:
     """
     Определяет количество студентов без отчества и распределение студентов по полу на основе отчества.
@@ -70,7 +66,10 @@ def faculty_statistics(data: pd.DataFrame) -> Tuple[pd.DataFrame, Tuple[str, int
     Подсчитывает количество студентов на каждом факультете,
     а также определяет факультеты с максимальным и минимальным числом студентов.
     """
-    pass
+    students_faculty = df.groupby('факультет').size()
+    max = students_faculty.idxmax()
+    min = students_faculty.idxmin()
+    return students_faculty, max, min
 
 
 # Задача 5
@@ -79,7 +78,8 @@ def course_statistics(data: pd.DataFrame) -> Tuple[pd.Series, pd.Series]:
     Вычисляет среднее и медианное число студентов на каждом курсе.
     Возвращает две серии с результатами: сначала средние, потом медиана.
     """
-    pass
+    students_courses = df.groupby('курс').size()
+    return students_courses.mean(), students_courses.median()
 
 
 # Задача 6
@@ -93,8 +93,15 @@ def most_popular_name(data: pd.DataFrame) -> Tuple[str, str, str, int, float]:
      3. факультет
      4. доля
     """
-    pass
-
+    df['имя'] = df['фио'].str.split().str[1]
+    names = df.groupby('имя').size()
+    df_most_popular_name = df[df['имя'] == names.idxmax()][['курс', 'факультет', 'группа']]
+    mpn_groups = df_most_popular_name.groupby('группа').size()
+    df_vsp = df[df['группа'] == mpn_groups.idxmax()].iloc[0]
+    course = df_vsp['курс']
+    fac = df_vsp['факультет']
+    name_ratio = len(df_most_popular_name)/len(df)
+    return names.idxmax(), mpn_groups.idxmax(),  fac, course, f'{name_ratio:.2f}'
 
 # Задача 7
 def find_students_with_name_starting_P(data: pd.DataFrame) -> pd.DataFrame:
@@ -143,22 +150,25 @@ if __name__ == "__main__":
     students_without_patronym, gender_counts = analyze_patronyms(fsuir)
     print('Задача 3:\n')
     print(f"Студентов без отчества: {students_without_patronym}")
-    print("Распределение по полу:\n", gender_counts)
+    print("Распределение по полу:\n", gender_counts, '\n\n')
     
     # Задача 4
     faculty_counts, max_faculty, min_faculty = faculty_statistics(data)
+    print('Задача 4:\n')
     print(f"Факультет с наибольшим числом студентов: {max_faculty}")
-    print(f"Факультет с наименьшим числом студентов: {min_faculty}")
+    print(f"Факультет с наименьшим числом студентов: {min_faculty}\n\n")
     
     # Задача 5
     mean_students, median_students = course_statistics(data)
+    print('Задача 5:\n')
     print("Среднее число студентов на курсах:", mean_students)
-    print("Медианное число студентов на курсах:", median_students)
+    print("Медианное число студентов на курсах:", median_students, '\n\n')
     
     # Задача 6
     popular_name, name_group, faculty, course, name_ratio = most_popular_name(data)
-    print(f"Самое популярное имя: {popular_name}, Группа: {name_group}, Факультет: {faculty}, Курс: {course}")
-    print(f"Доля студентов с этим именем: {name_ratio}")
+    print('Задача 6:\n')
+    print(f"Самое популярное имя: {popular_name},\nГруппа: {name_group},\nФакультет: {faculty},\nКурс: {course}")
+    print(f"Доля студентов с этим именем: {name_ratio}\n\n")
     
     # Задача 7
     result_7 = find_students_with_name_starting_P(data)
